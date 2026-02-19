@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週間スケジュール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --solo-biz: #2563eb;
+    --solo-biz-bg: #dbeafe;
+    --solo-biz-border: #93c5fd;
+    --keiba-ai: #059669;
+    --keiba-ai-bg: #d1fae5;
+    --keiba-ai-border: #6ee7b7;
+    --jrdb: #dc2626;
+    --jrdb-bg: #fee2e2;
+    --jrdb-border: #fca5a5;
+    --free: #6b7280;
+    --free-bg: #f3f4f6;
+    --free-border: #d1d5db;
+    --grid-line: #e5e7eb;
+    --grid-line-now: #ef4444;
+    --bg: #ffffff;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --header-bg: #f9fafb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f0f2f5;
+    color: var(--text);
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--bg);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .title-bar {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--grid-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .title-bar h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .title-bar .subtitle {
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 300;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  .calendar {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    min-height: 600px;
+  }
+
+  /* Header row */
+  .header-cell {
+    padding: 12px 4px;
+    text-align: center;
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--grid-line);
+    border-left: 1px solid var(--grid-line);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+
+  .header-cell.corner {
+    border-left: none;
+  }
+
+  .header-cell .day-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+  }
+
+  .header-cell .day-type {
+    font-size: 10px;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .header-cell .day-type.free {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .header-cell .day-type.office {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Time column + grid body */
+  .body-area {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    grid-column: 1 / -1;
+    position: relative;
+  }
+
+  .time-column {
+    position: relative;
+  }
+
+  .time-label {
+    position: absolute;
+    right: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-light);
+    transform: translateY(-50%);
+  }
+
+  .day-column {
+    position: relative;
+    border-left: 1px solid var(--grid-line);
+    min-height: 780px; /* 13 hours * 60px */
+  }
+
+  .hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--grid-line);
+  }
+
+  .half-hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--grid-line);
+    opacity: 0.4;
+  }
+
+  /* Events */
+  .event {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.4;
+    overflow: hidden;
+    cursor: default;
+    transition: box-shadow 0.15s ease;
+    border-left: 3px solid;
+  }
+
+  .event:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10 !important;
+  }
+
+  .event .event-title {
+    font-weight: 700;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event .event-time {
+    font-size: 10px;
+    opacity: 0.7;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 1px;
+  }
+
+  .event .event-desc {
+    font-size: 10px;
+    margin-top: 2px;
+    opacity: 0.8;
+    line-height: 1.3;
+  }
+
+  .event.solo-biz {
+    background: var(--solo-biz-bg);
+    border-left-color: var(--solo-biz);
+    color: #1e40af;
+  }
+
+  .event.keiba-ai {
+    background: var(--keiba-ai-bg);
+    border-left-color: var(--keiba-ai);
+    color: #065f46;
+  }
+
+  .event.jrdb {
+    background: var(--jrdb-bg);
+    border-left-color: var(--jrdb);
+    color: #991b1b;
+  }
+
+  .event.free-time {
+    background: var(--free-bg);
+    border-left-color: var(--free);
+    color: #374151;
+  }
+
+  /* Summary bar */
+  .summary {
+    padding: 20px 28px;
+    border-top: 2px solid var(--grid-line);
+    background: var(--header-bg);
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .summary-bar {
+    width: 8px;
+    height: 36px;
+    border-radius: 4px;
+  }
+
+  .summary-item .summary-label {
+    font-size: 12px;
+    color: var(--text-light);
+  }
+
+  .summary-item .summary-hours {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .summary-item .summary-pct {
+    font-size: 12px;
+    color: var(--text-light);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .summary-total {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .summary-total .total-label {
+    font-size: 11px;
+    color: var(--text-light);
+  }
+
+  .summary-total .total-hours {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 8px; }
+    .calendar { grid-template-columns: 40px repeat(7, 1fr); }
+    .body-area { grid-template-columns: 40px repeat(7, 1fr); }
+    .event { font-size: 9px; padding: 3px 4px; }
+    .event .event-desc { display: none; }
+    .title-bar { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title-bar">
+    <div>
+      <h1>週間タイムスケジュール</h1>
+      <div class="subtitle">一人稼業プロジェクト中心の時間配分</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--solo-biz);"></div>
+        一人稼業PJ
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--keiba-ai);"></div>
+        競馬AI PJ
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--jrdb);"></div>
+        JRDB業務
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--free);"></div>
+        休憩・運動等
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="calendar" style="min-height: auto;">
+    <div class="header-cell corner"></div>
+    <div class="header-cell">
+      <div class="day-name">月</div>
+      <div class="day-type free">自由日</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">火</div>
+      <div class="day-type free">自由日</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">水</div>
+      <div class="day-type free">自由日</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">木</div>
+      <div class="day-type office">出社</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">金</div>
+      <div class="day-type office">出社</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">土</div>
+      <div class="day-type office">出社</div>
+    </div>
+    <div class="header-cell">
+      <div class="day-name">日</div>
+      <div class="day-type office">出社</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body-area" id="calendarBody">
+    <div class="time-column" id="timeColumn"></div>
+    <div class="day-column" id="day-mon"></div>
+    <div class="day-column" id="day-tue"></div>
+    <div class="day-column" id="day-wed"></div>
+    <div class="day-column" id="day-thu"></div>
+    <div class="day-column" id="day-fri"></div>
+    <div class="day-column" id="day-sat"></div>
+    <div class="day-column" id="day-sun"></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <div class="summary-item">
+      <div class="summary-bar" style="background: var(--solo-biz);"></div>
+      <div>
+        <div class="summary-label">一人稼業PJ</div>
+        <div class="summary-hours" style="color: var(--solo-biz);">18.5h</div>
+        <div class="summary-pct">56%</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-bar" style="background: var(--keiba-ai);"></div>
+      <div>
+        <div class="summary-label">競馬AI PJ</div>
+        <div class="summary-hours" style="color: var(--keiba-ai);">7.5h</div>
+        <div class="summary-pct">23%</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-bar" style="background: var(--jrdb);"></div>
+      <div>
+        <div class="summary-label">JRDB業務（自由日分）</div>
+        <div class="summary-hours" style="color: var(--jrdb);">2h</div>
+        <div class="summary-pct">6%</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-bar" style="background: var(--free);"></div>
+      <div>
+        <div class="summary-label">休憩・運動・振り返り</div>
+        <div class="summary-hours" style="color: var(--free);">5h</div>
+        <div class="summary-pct">15%</div>
+      </div>
+    </div>
+    <div class="summary-total">
+      <div class="total-label">週間自由時間（月〜水+木午後）</div>
+      <div class="total-hours">33h</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const START_HOUR = 8;
+const END_HOUR = 21;
+const HOUR_HEIGHT = 60;
+const TOTAL_HOURS = END_HOUR - START_HOUR;
+
+// Draw time labels and hour lines
+function initGrid() {
+  const timeCol = document.getElementById('timeColumn');
+  const dayIds = ['day-mon','day-tue','day-wed','day-thu','day-fri','day-sat','day-sun'];
+
+  for (let h = START_HOUR; h <= END_HOUR; h++) {
+    const y = (h - START_HOUR) * HOUR_HEIGHT;
+    // Time label
+    const label = document.createElement('div');
+    label.className = 'time-label';
+    label.style.top = y + 'px';
+    label.textContent = h + ':00';
+    timeCol.appendChild(label);
+
+    // Hour lines on each day
+    dayIds.forEach(id => {
+      const col = document.getElementById(id);
+      if (h < END_HOUR) {
+        const line = document.createElement('div');
+        line.className = 'hour-line';
+        line.style.top = y + 'px';
+        col.appendChild(line);
+
+        const halfLine = document.createElement('div');
+        halfLine.className = 'half-hour-line';
+        halfLine.style.top = (y + 30) + 'px';
+        col.appendChild(halfLine);
+      }
+    });
+  }
+
+  // Set column heights
+  dayIds.forEach(id => {
+    document.getElementById(id).style.height = (TOTAL_HOURS * HOUR_HEIGHT) + 'px';
+  });
+  timeCol.style.height = (TOTAL_HOURS * HOUR_HEIGHT) + 'px';
+}
+
+function addEvent(dayId, startH, startM, endH, endM, title, desc, type) {
+  const col = document.getElementById(dayId);
+  const top = ((startH - START_HOUR) * 60 + startM);
+  const height = ((endH - START_HOUR) * 60 + endM) - top;
+
+  const el = document.createElement('div');
+  el.className = 'event ' + type;
+  el.style.top = top + 'px';
+  el.style.height = height + 'px';
+
+  const timeStr = `${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')}–${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
+
+  el.innerHTML = `
+    <div class="event-title">${title}</div>
+    <div class="event-time">${timeStr}</div>
+    ${height > 50 && desc ? `<div class="event-desc">${desc}</div>` : ''}
+  `;
+
+  col.appendChild(el);
+}
+
+initGrid();
+
+// === 月曜 ===
+addEvent('day-mon', 9, 0, 12, 0, '🔥 一人稼業PJ', '集中ブロック：リサーチ・開発', 'solo-biz');
+addEvent('day-mon', 12, 0, 14, 0, '🏃 昼休憩・運動', 'ランニング等', 'free-time');
+addEvent('day-mon', 14, 0, 16, 30, '🔥 一人稼業PJ', '午後の開発・設計', 'solo-biz');
+addEvent('day-mon', 16, 30, 17, 30, '📋 JRDB業務', '必要最低限の処理', 'jrdb');
+addEvent('day-mon', 17, 30, 18, 30, '🐴 競馬AI PJ', '開発・学習', 'keiba-ai');
+
+// === 火曜 ===
+addEvent('day-tue', 9, 0, 12, 0, '🔥 一人稼業PJ', '集中ブロック：リサーチ・開発', 'solo-biz');
+addEvent('day-tue', 12, 0, 14, 0, '🏃 昼休憩・運動', 'ランニング等', 'free-time');
+addEvent('day-tue', 14, 0, 16, 30, '🔥 一人稼業PJ', '午後の開発・設計', 'solo-biz');
+addEvent('day-tue', 16, 30, 17, 30, '📋 JRDB業務', '必要最低限の処理', 'jrdb');
+addEvent('day-tue', 17, 30, 18, 30, '🐴 競馬AI PJ', '開発・学習', 'keiba-ai');
+
+// === 水曜（JRDB業務なし） ===
+addEvent('day-wed', 9, 0, 12, 0, '🔥 一人稼業PJ', '集中ブロック：リサーチ・開発', 'solo-biz');
+addEvent('day-wed', 12, 0, 14, 0, '🏃 昼休憩・運動', 'ランニング等', 'free-time');
+addEvent('day-wed', 14, 0, 16, 30, '🔥 一人稼業PJ', '午後の開発・設計', 'solo-biz');
+addEvent('day-wed', 16, 30, 18, 30, '🐴 競馬AI PJ', '開発・学習', 'keiba-ai');
+
+// === 木曜（出社、3-4h自由） ===
+addEvent('day-thu', 9, 0, 14, 0, '📋 JRDB業務', '出社・通常業務', 'jrdb');
+addEvent('day-thu', 14, 0, 16, 0, '🔥 一人稼業PJ', '調査・設計・メモ整理', 'solo-biz');
+addEvent('day-thu', 16, 0, 17, 30, '🐴 競馬AI PJ', '開発・検証', 'keiba-ai');
+
+// === 金曜（出社） ===
+addEvent('day-fri', 9, 0, 18, 0, '📋 JRDB業務', '出社・通常業務', 'jrdb');
+
+// === 土曜（出社＋競馬開催日） ===
+addEvent('day-sat', 9, 0, 17, 0, '📋 JRDB業務', '出社・通常業務', 'jrdb');
+addEvent('day-sat', 18, 0, 19, 0, '🐴 競馬AI PJ', 'データ検証・レース観察', 'keiba-ai');
+
+// === 日曜（出社＋競馬開催日） ===
+addEvent('day-sun', 9, 0, 10, 0, '📝 週次振り返り', '翌週の計画・AAR', 'free-time');
+addEvent('day-sun', 10, 0, 17, 0, '📋 JRDB業務', '出社・通常業務', 'jrdb');
+addEvent('day-sun', 18, 0, 19, 0, '🐴 競馬AI PJ', 'データ検証・レース観察', 'keiba-ai');
+
+</script>
+
+</body>
+</html>
