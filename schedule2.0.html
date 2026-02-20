@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週間スケジュール v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --solo: #1d4ed8;
+    --solo-light: #dbeafe;
+    --solo-mid: #3b82f6;
+    --keiba: #059669;
+    --keiba-light: #d1fae5;
+    --keiba-mid: #10b981;
+    --jrdb: #dc2626;
+    --jrdb-light: #fee2e2;
+    --jrdb-mid: #f87171;
+    --buffer: #7c3aed;
+    --buffer-light: #ede9fe;
+    --buffer-mid: #a78bfa;
+    --rest: #64748b;
+    --rest-light: #f1f5f9;
+    --bg: #f0f2f5;
+    --card-bg: #ffffff;
+    --card-hover: #f8fafc;
+    --text: #1e293b;
+    --text-dim: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* === Header === */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px 0 24px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #1d4ed8, #7c3aed, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .philosophy {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .header .philosophy strong {
+    color: #b45309;
+    font-weight: 500;
+  }
+
+  /* === Week Grid === */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 900px) {
+    .week-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .week-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .day-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 20px 16px;
+    border: 1px solid var(--border);
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  .day-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .day-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  }
+
+  .day-card.solo::before { background: var(--solo); }
+  .day-card.keiba::before { background: var(--keiba); }
+  .day-card.jrdb::before { background: var(--jrdb); }
+  .day-card.buffer::before { background: var(--buffer); }
+  .day-card.rest::before { background: var(--rest); }
+
+  .day-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .day-name {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 12px;
+  }
+
+  .day-card.solo .day-name { color: var(--solo); }
+  .day-card.keiba .day-name { color: var(--keiba); }
+  .day-card.jrdb .day-name { color: var(--jrdb); }
+  .day-card.buffer .day-name { color: var(--buffer); }
+  .day-card.rest .day-name { color: var(--rest); }
+
+  .day-theme {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    letter-spacing: 0.03em;
+  }
+
+  .day-card.solo .day-theme { background: var(--solo-light); color: var(--solo); }
+  .day-card.keiba .day-theme { background: var(--keiba-light); color: var(--keiba); }
+  .day-card.jrdb .day-theme { background: var(--jrdb-light); color: var(--jrdb); }
+  .day-card.buffer .day-theme { background: var(--buffer-light); color: var(--buffer); }
+  .day-card.rest .day-theme { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+  .day-tasks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .day-tasks li {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .day-tasks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  .day-card.solo .day-tasks li::before { background: var(--solo-mid); }
+  .day-card.keiba .day-tasks li::before { background: var(--keiba-mid); }
+  .day-card.jrdb .day-tasks li::before { background: var(--jrdb-mid); }
+  .day-card.buffer .day-tasks li::before { background: var(--buffer-mid); }
+
+  .day-tasks li .time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .day-type {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* === Summary === */
+  .summary {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .summary-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .summary-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .bar-label {
+    font-size: 13px;
+    font-weight: 500;
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 24px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: white;
+    transition: width 0.8s ease;
+  }
+
+  .bar-fill.solo { background: linear-gradient(90deg, var(--solo), var(--solo-mid)); }
+  .bar-fill.keiba { background: linear-gradient(90deg, var(--keiba), var(--keiba-mid)); }
+  .bar-fill.jrdb { background: linear-gradient(90deg, var(--jrdb), var(--jrdb-mid)); }
+
+  .bar-hours {
+    font-size: 13px;
+    font-weight: 500;
+    width: 50px;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* === Rules === */
+  .rules {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+
+  .rules-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .rules-grid { grid-template-columns: 1fr; }
+  }
+
+  .rule {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .rule-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .rule strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* === Fade in animation === */
+  .day-card, .summary, .rules {
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .day-card:nth-child(1) { animation-delay: 0.05s; }
+  .day-card:nth-child(2) { animation-delay: 0.1s; }
+  .day-card:nth-child(3) { animation-delay: 0.15s; }
+  .day-card:nth-child(4) { animation-delay: 0.2s; }
+  .day-card:nth-child(5) { animation-delay: 0.25s; }
+  .day-card:nth-child(6) { animation-delay: 0.3s; }
+  .day-card:nth-child(7) { animation-delay: 0.35s; }
+  .summary { animation-delay: 0.45s; }
+  .rules { animation-delay: 0.55s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>WEEKLY FOCUS MAP</h1>
+    <p class="philosophy">1日1テーマ。のめり込みを武器にする。<strong>迷ったら「今日のテーマ」だけやる。</strong></p>
+  </div>
+
+  <!-- Week Grid -->
+  <div class="week-grid">
+
+    <!-- 月曜 -->
+    <div class="day-card solo">
+      <div class="day-label">MON</div>
+      <div class="day-name">月曜</div>
+      <div class="day-theme">🔥 一人稼業PJ</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 12:00</span>集中ブロック：リサーチ・開発</li>
+        <li><span class="time">12:00 – 14:00</span>昼休憩・運動（ランニング等）</li>
+        <li><span class="time">14:00 – 16:30</span>午後の開発・設計</li>
+        <li><span class="time">16:30 – 17:30</span>JRDB業務（最低限）</li>
+      </ul>
+      <div class="day-type">自由日 ─ 一人稼業どっぷり</div>
+    </div>
+
+    <!-- 火曜 -->
+    <div class="day-card solo">
+      <div class="day-label">TUE</div>
+      <div class="day-name">火曜</div>
+      <div class="day-theme">🔥 一人稼業PJ</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 12:00</span>集中ブロック：リサーチ・開発</li>
+        <li><span class="time">12:00 – 14:00</span>昼休憩・運動（ランニング等）</li>
+        <li><span class="time">14:00 – 16:30</span>午後の開発・設計</li>
+        <li><span class="time">16:30 – 17:30</span>JRDB業務（最低限）</li>
+      </ul>
+      <div class="day-type">自由日 ─ 一人稼業どっぷり</div>
+    </div>
+
+    <!-- 水曜 -->
+    <div class="day-card buffer">
+      <div class="day-label">WED</div>
+      <div class="day-name">水曜</div>
+      <div class="day-theme">🎯 バッファ日</div>
+      <ul class="day-tasks">
+        <li>その週の勢いで一人稼業 or 競馬AIを選ぶ</li>
+        <li>迷ったら一人稼業を優先</li>
+      </ul>
+      <div class="day-type">自由日 ─ 流れに乗る日</div>
+    </div>
+
+    <!-- 木曜 -->
+    <div class="day-card jrdb">
+      <div class="day-label">THU</div>
+      <div class="day-name">木曜</div>
+      <div class="day-theme">📋 出社＋競馬AI</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 14:00</span>JRDB業務（出社）</li>
+        <li><span class="time">14:00 – 17:30</span>競馬AI PJ（開発・検証）</li>
+      </ul>
+      <div class="day-type">出社日 ─ JRDB＋競馬AI</div>
+    </div>
+
+    <!-- 金曜 -->
+    <div class="day-card jrdb">
+      <div class="day-label">FRI</div>
+      <div class="day-name">金曜</div>
+      <div class="day-theme">📋 JRDB業務</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 18:00</span>出社・通常業務</li>
+      </ul>
+      <div class="day-type">出社日 ─ JRDB集中</div>
+    </div>
+
+    <!-- 土曜 -->
+    <div class="day-card jrdb">
+      <div class="day-label">SAT</div>
+      <div class="day-name">土曜</div>
+      <div class="day-theme">📋 JRDB＋競馬AI</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 17:00</span>出社・通常業務＋競馬AI PJ</li>
+      </ul>
+      <div class="day-type">出社日 ─ 競馬開催日</div>
+    </div>
+
+    <!-- 日曜 -->
+    <div class="day-card rest">
+      <div class="day-label">SUN</div>
+      <div class="day-name">日曜</div>
+      <div class="day-theme">📝 振り返り＋出社</div>
+      <ul class="day-tasks">
+        <li><span class="time">9:00 – 10:00</span>週次振り返り・翌週の計画</li>
+        <li><span class="time">10:00 – 17:00</span>JRDB業務（出社）＋インプットタイム</li>
+        <li><span class="time">18:00 – 19:00</span>競馬AI PJ（データ検証）</li>
+      </ul>
+      <div class="day-type">出社日 ─ 振り返り＋競馬開催日</div>
+    </div>
+
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <div class="summary-title">WEEKLY BREAKDOWN（自由時間ベース）</div>
+    <div class="summary-bars">
+      <div class="bar-row">
+        <div class="bar-label" style="color: var(--solo);">🔥 一人稼業PJ</div>
+        <div class="bar-track">
+          <div class="bar-fill solo" style="width: 65%;">65%</div>
+        </div>
+        <div class="bar-hours">~16h</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color: var(--keiba);">🐴 競馬AI PJ</div>
+        <div class="bar-track">
+          <div class="bar-fill keiba" style="width: 27%;">27%</div>
+        </div>
+        <div class="bar-hours">~7h</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color: var(--jrdb);">📋 JRDB（自由日分）</div>
+        <div class="bar-track">
+          <div class="bar-fill jrdb" style="width: 8%;">8%</div>
+        </div>
+        <div class="bar-hours">~2h</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules -->
+  <div class="rules">
+    <div class="rules-title">運用ルール</div>
+    <div class="rules-grid">
+      <div class="rule">
+        <span class="rule-icon">🧠</span>
+        <span><strong>1日1テーマ</strong> ─ 朝起きたらその日のテーマだけやる。スイッチングしない。</span>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">🌊</span>
+        <span><strong>水曜はバッファ</strong> ─ 乗ってる方をやる。迷ったら一人稼業。</span>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">📖</span>
+        <span><strong>日記で回す</strong> ─ ①昨日の一つやったか ②今日あったこと ③教訓 ④明日やる一つ</span>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">🔄</span>
+        <span><strong>日曜に振り返り</strong> ─ 翌週の水曜をどっちに使うか、ここで決める。</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
