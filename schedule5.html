@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週間スケジュール v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --solo: #1d4ed8;
+    --solo-light: #dbeafe;
+    --solo-mid: #2563eb;
+    --keiba: #059669;
+    --keiba-light: #d1fae5;
+    --keiba-mid: #047857;
+    --jrdb: #dc2626;
+    --jrdb-light: #fee2e2;
+    --jrdb-mid: #b91c1c;
+    --buffer: #7c3aed;
+    --buffer-light: #ede9fe;
+    --buffer-mid: #6d28d9;
+    --konkatsu: #e11d48;
+    --konkatsu-light: #ffe4e6;
+    --konkatsu-mid: #be123c;
+    --body: #d97706;
+    --body-light: #fef3c7;
+    --body-mid: #b45309;
+    --rest: #64748b;
+    --rest-light: #f1f5f9;
+    --bg: #f5f5f0;
+    --card-bg: #ffffff;
+    --card-hover: #fafaf8;
+    --text: #1a1a1a;
+    --text-dim: #444444;
+    --text-muted: #888888;
+    --border: #e0e0d8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* === Header === */
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 32px 0 16px;
+  }
+
+  .header h1 {
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .philosophy {
+    font-size: 17px;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .header .philosophy strong {
+    color: #b45309;
+    font-weight: 600;
+  }
+
+  /* === Vision Banner === */
+  .vision-banner {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .vision-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #e11d48, #f59e0b, #10b981);
+  }
+
+  .vision-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .vision-goals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .vision-goal {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #f9f9f6;
+    border-radius: 10px;
+    border: 1px solid #eeeee8;
+  }
+
+  .vision-goal .icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .vision-goal .goal-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .vision-goal .goal-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  /* === Week Grid === */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .day-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 16px 14px;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .day-card:hover {
+    background: var(--card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+
+  .day-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .day-card.solo::before { background: var(--solo); }
+  .day-card.buffer::before { background: var(--buffer); }
+  .day-card.jrdb::before { background: var(--jrdb); }
+  .day-card.keiba::before { background: var(--keiba); }
+
+  .day-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+  }
+
+  .day-jp {
+    font-size: 15px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    font-weight: 300;
+  }
+
+  .day-theme {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .day-card.solo .day-theme { color: var(--solo-mid); }
+  .day-card.buffer .day-theme { color: var(--buffer-mid); }
+  .day-card.jrdb .day-theme { color: var(--jrdb-mid); }
+  .day-card.keiba .day-theme { color: var(--keiba-mid); }
+
+  .time-block {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: flex-start;
+  }
+
+  .time-block .time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 38px;
+    padding-top: 1px;
+  }
+
+  .time-block .activity {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .day-footer {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  /* === Daily Habits (Konkatsu + Fitness) === */
+  .daily-habits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .habit-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .habit-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .habit-card.konkatsu::before { background: var(--konkatsu); }
+  .habit-card.fitness::before { background: var(--body); }
+
+  .habit-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .habit-icon {
+    font-size: 22px;
+  }
+
+  .habit-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .habit-card.konkatsu .habit-title { color: var(--konkatsu-mid); }
+  .habit-card.fitness .habit-title { color: var(--body-mid); }
+
+  .habit-detail {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .habit-why {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: #f9f9f6;
+    border-radius: 8px;
+    padding: 12px 14px;
+    line-height: 1.7;
+    border-left: 3px solid;
+  }
+
+  .habit-card.konkatsu .habit-why { border-color: var(--konkatsu); }
+  .habit-card.fitness .habit-why { border-color: var(--body); }
+
+  /* === Why Section === */
+  .why-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .why-section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .why-item {
+    padding: 18px;
+    background: #f9f9f6;
+    border-radius: 12px;
+    border: 1px solid #eeeee8;
+  }
+
+  .why-item .label {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .why-item.solo-item .label { color: var(--solo-mid); }
+  .why-item.tenkaizu-item .label { color: #be185d; }
+  .why-item.keiba-item .label { color: var(--keiba-mid); }
+
+  .why-item .what {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .why-item .outcome {
+    font-size: 14px;
+    color: #b45309;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  /* === Breakdown === */
+  .breakdown {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .breakdown h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+
+  .breakdown-items {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .breakdown-item {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .breakdown-item .b-label {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .breakdown-item .b-bar {
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    position: relative;
+    background: #eeeee8;
+  }
+
+  .breakdown-item .b-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .breakdown-item .b-stats {
+    display: flex;
+    gap: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+  }
+
+  .breakdown-item .b-hours {
+    font-weight: 600;
+  }
+
+  .breakdown-item .b-pct {
+    color: var(--text-muted);
+  }
+
+  /* === Rules === */
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .rule-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .rule-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .rule-text {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .rule-text strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* === Responsive === */
+  @media (max-width: 900px) {
+    .week-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .vision-goals {
+      grid-template-columns: 1fr;
+    }
+    .why-grid {
+      grid-template-columns: 1fr;
+    }
+    .daily-habits {
+      grid-template-columns: 1fr;
+    }
+    .rules {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .week-grid {
+      grid-template-columns: 1fr;
+    }
+    .breakdown-items {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>WEEKLY FOCUS MAP v3</h1>
+    <div class="philosophy">1日1テーマ。のめり込みを武器にする。<strong>迷ったら「今日のテーマ」だけやる。</strong></div>
+  </div>
+
+  <!-- Vision Banner -->
+  <div class="vision-banner">
+    <div class="vision-title">🎯 直近の2大目標 ─ すべての行動はここに向かう</div>
+    <div class="vision-goals">
+      <div class="vision-goal">
+        <div class="icon">💰</div>
+        <div>
+          <div class="goal-text">月の手取りを30万円にする</div>
+          <div class="goal-sub">本業 20万 + 副業 10万。スーパー展開図の商用化で最初の1円を稼ぐのが第一歩。<br>→ その先に家、車、自由な働き方がある。</div>
+        </div>
+      </div>
+      <div class="vision-goal">
+        <div class="icon">💑</div>
+        <div>
+          <div class="goal-text">結婚して子供が欲しい</div>
+          <div class="goal-sub">38歳、適齢期は待ってくれない。婚活は「後で」じゃなく「今」やる。<br>→ 彼女ができれば仕事も頑張れる。最強のモチベーション。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week Grid -->
+  <div class="week-grid">
+
+    <!-- MON -->
+    <div class="day-card solo">
+      <div class="day-label">MON</div>
+      <div class="day-jp">月曜</div>
+      <div class="day-theme">🔥 スーパー展開図</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">集中ブロック：展開図の商用化開発</span>
+      </div>
+      <div class="time-block">
+        <span class="time">12:00</span>
+        <span class="activity">昼休憩・ランニング</span>
+      </div>
+      <div class="time-block">
+        <span class="time">14:00</span>
+        <span class="activity">午後の開発・設計</span>
+      </div>
+      <div class="time-block">
+        <span class="time">16:30</span>
+        <span class="activity">本業（最低限）</span>
+      </div>
+      <div class="day-footer">自由日 ─ 稼ぐ力を作る日</div>
+    </div>
+
+    <!-- TUE -->
+    <div class="day-card solo">
+      <div class="day-label">TUE</div>
+      <div class="day-jp">火曜</div>
+      <div class="day-theme">🔥 スーパー展開図</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">集中ブロック：展開図の商用化開発</span>
+      </div>
+      <div class="time-block">
+        <span class="time">12:00</span>
+        <span class="activity">昼休憩・ランニング</span>
+      </div>
+      <div class="time-block">
+        <span class="time">14:00</span>
+        <span class="activity">午後の開発・設計</span>
+      </div>
+      <div class="time-block">
+        <span class="time">16:30</span>
+        <span class="activity">本業（最低限）</span>
+      </div>
+      <div class="day-footer">自由日 ─ 稼ぐ力を作る日</div>
+    </div>
+
+    <!-- WED -->
+    <div class="day-card buffer">
+      <div class="day-label">WED</div>
+      <div class="day-jp">水曜</div>
+      <div class="day-theme">🎯 バッファ日</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">展開図の続き or 一人稼業リサーチ</span>
+      </div>
+      <div class="time-block">
+        <span class="time">12:00</span>
+        <span class="activity">昼休憩・運動</span>
+      </div>
+      <div class="time-block">
+        <span class="time">14:00</span>
+        <span class="activity">その週の勢いで選ぶ</span>
+      </div>
+      <div class="day-footer">自由日 ─ 迷ったら展開図を優先</div>
+    </div>
+
+    <!-- THU -->
+    <div class="day-card keiba">
+      <div class="day-label">THU</div>
+      <div class="day-jp">木曜</div>
+      <div class="day-theme">📋 出社＋競馬AI</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">本業（出社）</span>
+      </div>
+      <div class="time-block">
+        <span class="time">14:00</span>
+        <span class="activity">競馬AI PJ（開発・検証）</span>
+      </div>
+      <div class="day-footer">出社日 ─ 本業＋競馬AI</div>
+    </div>
+
+    <!-- FRI -->
+    <div class="day-card jrdb">
+      <div class="day-label">FRI</div>
+      <div class="day-jp">金曜</div>
+      <div class="day-theme">📋 本業</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">出社・通常業務</span>
+      </div>
+      <div class="day-footer">出社日 ─ 本業集中</div>
+    </div>
+
+    <!-- SAT -->
+    <div class="day-card jrdb">
+      <div class="day-label">SAT</div>
+      <div class="day-jp">土曜</div>
+      <div class="day-theme">📋 本業＋競馬AI</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">出社・通常業務＋競馬AI PJ</span>
+      </div>
+      <div class="day-footer">出社日 ─ 競馬開催日</div>
+    </div>
+
+    <!-- SUN -->
+    <div class="day-card jrdb">
+      <div class="day-label">SUN</div>
+      <div class="day-jp">日曜</div>
+      <div class="day-theme">📝 振り返り＋出社</div>
+      <div class="time-block">
+        <span class="time">9:00</span>
+        <span class="activity">週次振り返り・翌週の計画</span>
+      </div>
+      <div class="time-block">
+        <span class="time">10:00</span>
+        <span class="activity">本業（出社）</span>
+      </div>
+      <div class="day-footer">出社日 ─ 振り返り＋競馬開催日</div>
+    </div>
+
+  </div>
+
+  <!-- Daily Habits -->
+  <div class="daily-habits">
+
+    <div class="habit-card konkatsu">
+      <div class="habit-header">
+        <div class="habit-icon">💌</div>
+        <div class="habit-title">婚活 ─ 毎晩30分</div>
+      </div>
+      <div class="habit-detail">
+        夜にマッチングアプリを30分。メッセージのやりとり、プロフィール改善、新しい人へのいいね。週末にデートを入れることを目指す。深集中は不要 ─ 短時間×毎日の方がマッチしやすい。
+      </div>
+      <div class="habit-why">
+        <strong>なぜやるか：</strong>38歳、適齢期は待ってくれない。「稼いでから」では遅い。彼女ができれば仕事のギアが上がる。収入×パートナー、両方同時に動かす。
+      </div>
+    </div>
+
+    <div class="habit-card fitness">
+      <div class="habit-header">
+        <div class="habit-icon">🏃</div>
+        <div class="habit-title">体づくり ─ 昼の運動習慣</div>
+      </div>
+      <div class="habit-detail">
+        月〜水のリモート日は12:00〜14:00にランニング。出社日も可能な範囲で体を動かす。目標：179cm / 83kg → 78kg（月1〜2kgペース、3〜5ヶ月で達成）。食事も少し意識する。
+      </div>
+      <div class="habit-why">
+        <strong>なぜやるか：</strong>婚活のアプリ写真は第一印象の9割。5kg落とせば「普通体型」の印象に。体が変わると自信がつく。自信は婚活にも仕事にも効く。
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Why Section -->
+  <div class="why-section">
+    <h2>💡 各プロジェクト ─ 何のためにやるのか</h2>
+    <div class="why-grid">
+
+      <div class="why-item tenkaizu-item">
+        <div class="label">📐 スーパー展開図（商用化）</div>
+        <div class="what">
+          本業本業の知見を活かした商用プロダクト。すでに技術と知識があるから「ゼロから市場リサーチ」が不要。今のフェーズで一番早くお金になる可能性が高い。
+        </div>
+        <div class="outcome">→ 月+10万の副収入 = 手取り30万達成。最初の1件が売れれば、一人稼業全体のエンジンになる。</div>
+      </div>
+
+      <div class="why-item solo-item">
+        <div class="label">🔥 一人稼業PJ（リサーチ）</div>
+        <div class="what">
+          展開図以外の収入源を探索するリサーチ。営業リスト自動生成ツールなど。水曜バッファ日で展開図が一段落したときに進める。
+        </div>
+        <div class="outcome">→ 収入源の複線化。展開図が軌道に乗った後の「次の柱」を準備しておく。</div>
+      </div>
+
+      <div class="why-item keiba-item">
+        <div class="label">🐴 競馬AI PJ</div>
+        <div class="what">
+          本業本業とのシナジーが大きい。本業の延長線上で知識が深まるし、うまくいけば馬券収入にもなりうる。出社日（木・土・日）に進める。
+        </div>
+        <div class="outcome">→ 本業の価値向上 + 潜在的な副収入。ただし今は展開図より優先度は下。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="breakdown">
+    <h2>WEEKLY BREAKDOWN（自由時間ベース）</h2>
+    <div class="breakdown-items">
+
+      <div class="breakdown-item">
+        <div class="b-label" style="color: var(--solo-mid);">📐 スーパー展開図</div>
+        <div class="b-bar">
+          <div class="b-bar-fill" style="width: 65%; background: var(--solo);"></div>
+        </div>
+        <div class="b-stats">
+          <span class="b-hours" style="color: var(--solo-mid);">~16h</span>
+          <span class="b-pct">65%</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="b-label" style="color: var(--keiba-mid);">🐴 競馬AI PJ</div>
+        <div class="b-bar">
+          <div class="b-bar-fill" style="width: 27%; background: var(--keiba);"></div>
+        </div>
+        <div class="b-stats">
+          <span class="b-hours" style="color: var(--keiba-mid);">~7h</span>
+          <span class="b-pct">27%</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="b-label" style="color: var(--konkatsu-mid);">💌 婚活</div>
+        <div class="b-bar">
+          <div class="b-bar-fill" style="width: 14%; background: var(--konkatsu);"></div>
+        </div>
+        <div class="b-stats">
+          <span class="b-hours" style="color: var(--konkatsu-mid);">~3.5h</span>
+          <span class="b-pct">毎日30分</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <div class="b-label" style="color: var(--body-mid);">🏃 体づくり</div>
+        <div class="b-bar">
+          <div class="b-bar-fill" style="width: 24%; background: var(--body);"></div>
+        </div>
+        <div class="b-stats">
+          <span class="b-hours" style="color: var(--body-mid);">~6h</span>
+          <span class="b-pct">運動+昼休憩</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Rules -->
+  <div class="rules">
+
+    <div class="rule-card">
+      <div class="rule-icon">🧠</div>
+      <div class="rule-text">
+        <strong>1日1テーマ</strong> ─ 朝起きたらその日のテーマだけやる。スイッチングしない。のめり込みを武器にする。
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-icon">🌊</div>
+      <div class="rule-text">
+        <strong>水曜はバッファ</strong> ─ 展開図が乗ってるなら続行。一段落したら一人稼業リサーチ。迷ったら展開図。
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-icon">📖</div>
+      <div class="rule-text">
+        <strong>日記で回す</strong> ─ ①昨日の一つやったか ②今日あったこと ③教訓 ④明日やる一つ
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-icon">🔄</div>
+      <div class="rule-text">
+        <strong>日曜に振り返り</strong> ─ 翌週の水曜をどっちに使うか決める。婚活の進捗も棚卸し。
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-icon">💌</div>
+      <div class="rule-text">
+        <strong>婚活は夜の習慣</strong> ─ 毎晩30分、寝る前にアプリを開く。日中の集中を邪魔しない。
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-icon">⚡</div>
+      <div class="rule-text">
+        <strong>迷ったら「①か？」</strong> ─ 重要×緊急だけ頑張る。今の①はスーパー展開図の商用化と婚活。
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
