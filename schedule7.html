@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>週間スケジュール v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --solo: #1d4ed8;
+    --solo-mid: #2563eb;
+    --tenkaizu: #7c3aed;
+    --tenkaizu-mid: #6d28d9;
+    --keiba: #059669;
+    --keiba-mid: #047857;
+    --hongyou: #dc2626;
+    --hongyou-mid: #b91c1c;
+    --konkatsu: #e11d48;
+    --konkatsu-mid: #be123c;
+    --body: #d97706;
+    --body-mid: #b45309;
+    --bg: #f5f5f0;
+    --card-bg: #ffffff;
+    --card-hover: #fafaf8;
+    --text: #1a1a1a;
+    --text-dim: #444444;
+    --text-muted: #888888;
+    --border: #e0e0d8;
+    --accent: #b45309;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 20px; padding: 32px 0 16px; }
+  .header h1 {
+    font-size: 34px; font-weight: 900; letter-spacing: 0.05em; margin-bottom: 8px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed, #059669);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header .philosophy { font-size: 17px; color: var(--text-dim); font-weight: 300; }
+  .header .philosophy strong { color: var(--accent); font-weight: 600; }
+
+  /* Vision */
+  .vision-banner {
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px 32px; margin-bottom: 28px; position: relative; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .vision-banner::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #2563eb, #e11d48, #d97706, #059669);
+  }
+  .vision-title { font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 16px; }
+  .vision-goals { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .vision-goal {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px; background: #f9f9f6; border-radius: 10px; border: 1px solid #eeeee8;
+  }
+  .vision-goal .icon { font-size: 24px; flex-shrink: 0; }
+  .vision-goal .goal-text { font-size: 16px; font-weight: 600; line-height: 1.5; }
+  .vision-goal .goal-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.6; }
+
+  /* Week Grid */
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; }
+  .day-card {
+    background: var(--card-bg); border-radius: 14px; padding: 18px 16px;
+    border: 1px solid var(--border); transition: all 0.3s ease; position: relative; overflow: hidden;
+  }
+  .day-card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .day-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .day-card.solo::before { background: var(--solo); }
+  .day-card.tenkaizu::before { background: var(--tenkaizu); }
+  .day-card.hongyou::before { background: var(--hongyou); }
+  .day-card.keiba::before { background: var(--keiba); }
+
+  .day-label { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .day-jp { font-size: 15px; color: var(--text-dim); margin-bottom: 10px; font-weight: 300; }
+  .day-theme { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .day-card.solo .day-theme { color: var(--solo-mid); }
+  .day-card.tenkaizu .day-theme { color: var(--tenkaizu-mid); }
+  .day-card.hongyou .day-theme { color: var(--hongyou-mid); }
+  .day-card.keiba .day-theme { color: var(--keiba-mid); }
+
+  .day-desc { font-size: 14px; color: var(--text-dim); line-height: 1.7; margin-bottom: 12px; }
+
+  .time-block { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+  .time-block .time { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted); white-space: nowrap; min-width: 42px; padding-top: 2px; }
+  .time-block .activity { font-size: 14px; color: var(--text-dim); line-height: 1.5; }
+
+  .day-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); font-weight: 300; }
+
+  /* Cycle */
+  .cycle-section {
+    background: var(--card-bg); border-radius: 16px; padding: 28px 32px;
+    border: 1px solid var(--border); margin-bottom: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .cycle-section h2 { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+  .cycle-flow {
+    display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .cycle-step {
+    padding: 14px 20px; border-radius: 12px; font-size: 15px; font-weight: 600;
+    text-align: center; min-width: 160px;
+  }
+  .cycle-step.s1 { background: var(--solo); color: #fff; border-radius: 12px; }
+  .cycle-step.s2 { background: var(--solo); color: #fff; }
+  .cycle-step.s3 { background: #1e293b; color: #fff; }
+  .cycle-arrow { font-size: 24px; color: var(--text-muted); }
+  .cycle-branch {
+    display: flex; justify-content: center; gap: 32px; margin-top: 8px;
+  }
+  .cycle-result {
+    padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center;
+  }
+  .cycle-result.yes { background: #d1fae5; color: #047857; }
+  .cycle-result.no { background: #fee2e2; color: #b91c1c; }
+
+  /* Daily Habits */
+  .daily-habits { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  .habit-card {
+    background: var(--card-bg); border-radius: 14px; padding: 20px 24px;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+  }
+  .habit-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .habit-card.konkatsu::before { background: var(--konkatsu); }
+  .habit-card.fitness::before { background: var(--body); }
+  .habit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .habit-icon { font-size: 22px; }
+  .habit-title { font-size: 17px; font-weight: 700; }
+  .habit-card.konkatsu .habit-title { color: var(--konkatsu-mid); }
+  .habit-card.fitness .habit-title { color: var(--body-mid); }
+  .habit-detail { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+  /* Rules */
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 28px; }
+  .rule-card {
+    background: var(--card-bg); border-radius: 12px; padding: 16px 20px;
+    border: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start;
+  }
+  .rule-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .rule-text { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+  .rule-text strong { color: var(--text); font-weight: 700; }
+
+  /* Min Set */
+  .min-set {
+    background: var(--card-bg); border-radius: 16px; padding: 24px 28px;
+    border: 1px solid var(--border);
+  }
+  .min-set h2 { font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+  .min-set-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .min-set-col h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .min-set-item { font-size: 14px; color: var(--text-dim); line-height: 1.6; padding: 6px 0; display: flex; align-items: flex-start; gap: 8px; }
+  .min-set-item::before { content: '□'; font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); flex-shrink: 0; }
+
+  @media (max-width: 900px) {
+    .week-grid { grid-template-columns: repeat(2, 1fr); }
+    .vision-goals, .daily-habits, .rules, .min-set-grid { grid-template-columns: 1fr; }
+    .cycle-flow { flex-direction: column; }
+    .cycle-arrow { transform: rotate(90deg); }
+    .cycle-branch { flex-direction: column; gap: 12px; }
+  }
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .week-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>WEEKLY FOCUS MAP v5</h1>
+    <div class="philosophy">1日1テーマ。<strong>調べて、作って、出す。シンプルに回す。</strong></div>
+  </div>
+
+  <!-- Vision -->
+  <div class="vision-banner">
+    <div class="vision-title">🎯 直近の2大目標</div>
+    <div class="vision-goals">
+      <div class="vision-goal">
+        <div class="icon">💰</div>
+        <div>
+          <div class="goal-text">月の手取りを30万円にする</div>
+          <div class="goal-sub">本業20万 + 一人稼業10万。取り分100%の自分のプロダクトで稼ぐ。</div>
+        </div>
+      </div>
+      <div class="vision-goal">
+        <div class="icon">💑</div>
+        <div>
+          <div class="goal-text">結婚して子供が欲しい</div>
+          <div class="goal-sub">適齢期は待ってくれない。婚活は「後で」じゃなく「今」動かす。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week Grid -->
+  <div class="week-grid">
+
+    <div class="day-card solo">
+      <div class="day-label">MON</div>
+      <div class="day-jp">月曜</div>
+      <div class="day-theme">🔍 市場調査・ニーズ確認</div>
+      <div class="day-desc">「これ需要ある？」を調べる日。X検索、Google、ココナラ、既存サービスのレビューなどで需要を確認。</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">市場調査・ニーズ確認</span></div>
+      <div class="time-block"><span class="time">12:00</span><span class="activity">昼休憩・ランニング</span></div>
+      <div class="time-block"><span class="time">14:00</span><span class="activity">調査の続き・「何を作るか」を決める</span></div>
+      <div class="day-footer">自由日 ─ 需要を探す</div>
+    </div>
+
+    <div class="day-card solo">
+      <div class="day-label">TUE</div>
+      <div class="day-jp">火曜</div>
+      <div class="day-theme">🔨 MVP作成・公開</div>
+      <div class="day-desc">月曜に「需要あり」と判断したものを作る。作ったらその日のうちに公開。完璧じゃなくていい。</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">MVP開発（AIフル活用）</span></div>
+      <div class="time-block"><span class="time">12:00</span><span class="activity">昼休憩・ランニング</span></div>
+      <div class="time-block"><span class="time">14:00</span><span class="activity">仕上げ・公開・Xで発信（1回目）</span></div>
+      <div class="day-footer">自由日 ─ 作って出す</div>
+    </div>
+
+    <div class="day-card tenkaizu">
+      <div class="day-label">WED</div>
+      <div class="day-jp">水曜</div>
+      <div class="day-theme">📐 スーパー展開図</div>
+      <div class="day-desc">売る経験を積む練習試合。取り分は薄いが、値付け・納品・顧客対応の学びを一人稼業に横展開する。</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">展開図の商用化作業</span></div>
+      <div class="time-block"><span class="time">12:00</span><span class="activity">昼休憩・運動</span></div>
+      <div class="time-block"><span class="time">14:00</span><span class="activity">午後の作業</span></div>
+      <div class="day-footer">自由日 ─ 売る筋肉を鍛える</div>
+    </div>
+
+    <div class="day-card keiba">
+      <div class="day-label">THU</div>
+      <div class="day-jp">木曜</div>
+      <div class="day-theme">📋 出社＋競馬AI</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">本業（出社）</span></div>
+      <div class="time-block"><span class="time">14:00</span><span class="activity">競馬AI PJ（開発・検証）</span></div>
+      <div class="day-footer">出社日 ─ Xで発信（2回目）</div>
+    </div>
+
+    <div class="day-card hongyou">
+      <div class="day-label">FRI</div>
+      <div class="day-jp">金曜</div>
+      <div class="day-theme">📋 本業</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">出社・通常業務</span></div>
+      <div class="day-footer">出社日 ─ 本業集中</div>
+    </div>
+
+    <div class="day-card hongyou">
+      <div class="day-label">SAT</div>
+      <div class="day-jp">土曜</div>
+      <div class="day-theme">📋 本業＋競馬AI</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">出社・通常業務＋競馬AI PJ</span></div>
+      <div class="day-footer">出社日 ─ 競馬開催日</div>
+    </div>
+
+    <div class="day-card hongyou">
+      <div class="day-label">SUN</div>
+      <div class="day-jp">日曜</div>
+      <div class="day-theme">📝 振り返り＋出社</div>
+      <div class="time-block"><span class="time">9:00</span><span class="activity">週次振り返り（20分）</span></div>
+      <div class="time-block"><span class="time">10:00</span><span class="activity">本業（出社）</span></div>
+      <div class="day-footer">出社日 ─ 反応チェック＋翌週の判断</div>
+    </div>
+
+  </div>
+
+  <!-- Cycle -->
+  <div class="cycle-section">
+    <h2>🔄 一人稼業サイクル</h2>
+    <div class="cycle-flow">
+      <div class="cycle-step s1">🔍 月：調べる</div>
+      <div class="cycle-arrow">→</div>
+      <div class="cycle-step s2">🔨 火：作って出す</div>
+      <div class="cycle-arrow">→</div>
+      <div class="cycle-step s3">📡 Xで週2回発信</div>
+    </div>
+    <div class="cycle-branch">
+      <div class="cycle-result yes">✅ 反応あり → 翌週も継続して作り込む</div>
+      <div class="cycle-result no">❌ 反応なし → 月曜に戻って別ネタを調べる</div>
+    </div>
+  </div>
+
+  <!-- Daily Habits -->
+  <div class="daily-habits">
+    <div class="habit-card konkatsu">
+      <div class="habit-header">
+        <div class="habit-icon">💌</div>
+        <div class="habit-title">婚活 ─ 毎晩30分 ＋ 週1回会う</div>
+      </div>
+      <div class="habit-detail">夜にアプリ30分。週1回は会う or 通話。プロフ写真の最適化が最優先。「痩せてから」は先延ばしの罠。</div>
+    </div>
+    <div class="habit-card fitness">
+      <div class="habit-header">
+        <div class="habit-icon">🏃</div>
+        <div class="habit-title">体づくり ─ 週3回運動</div>
+      </div>
+      <div class="habit-detail">リモート日の昼にランニング＋週末1回。83kg → 78kg目標。食事は1ルールだけ：夜の炭水化物を半分。</div>
+    </div>
+  </div>
+
+  <!-- Rules -->
+  <div class="rules">
+    <div class="rule-card">
+      <div class="rule-icon">🧠</div>
+      <div class="rule-text"><strong>1日1テーマ</strong> ─ 月は調べる、火は作る、水は展開図。スイッチングしない。</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">📡</div>
+      <div class="rule-text"><strong>Xで週2回発信</strong> ─ 火曜に公開報告、木曜に実例/スクショ。見られなければ判断できない。</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">📖</div>
+      <div class="rule-text"><strong>日記で回す</strong> ─ ①昨日の一つやったか ②今日あったこと ③教訓 ④明日やる一つ</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">⚡</div>
+      <div class="rule-text"><strong>迷ったら「①か？」</strong> ─ 今の①は一人稼業と婚活。それ以外は今じゃない。</div>
+    </div>
+  </div>
+
+  <!-- Min Set -->
+  <div class="min-set">
+    <h2>✅ これだけは絶対やれ</h2>
+    <div class="min-set-grid">
+      <div class="min-set-col">
+        <h3>毎日</h3>
+        <div class="min-set-item">婚活30分</div>
+        <div class="min-set-item">5分だけ体を動かす</div>
+      </div>
+      <div class="min-set-col">
+        <h3>毎週</h3>
+        <div class="min-set-item">月に調べる、火に作って出す</div>
+        <div class="min-set-item">Xで2回発信</div>
+        <div class="min-set-item">週1回は会う or 通話</div>
+        <div class="min-set-item">週3回運動</div>
+        <div class="min-set-item">日曜に振り返り20分</div>
+      </div>
+      <div class="min-set-col">
+        <h3>毎月</h3>
+        <div class="min-set-item">一人稼業の方向性を見直す</div>
+        <div class="min-set-item">転職観測1回</div>
+        <div class="min-set-item">体重チェック</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
