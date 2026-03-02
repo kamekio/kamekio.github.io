@@ -26,7 +26,8 @@
     font-family: 'Noto Sans JP', sans-serif;
     color: var(--text);
     padding: 32px 20px 60px;
-    min-width: 900px;
+    max-width: 1100px;
+    margin: 0 auto;
   }
   .header {
     text-align: center;
@@ -91,15 +92,15 @@
   .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    gap: 7px;
     margin-bottom: 28px;
   }
   .day-col {
     background: var(--card);
     border-radius: var(--radius);
-    padding: 14px 12px;
+    padding: 10px 9px;
     border-top: 4px solid;
-    font-size: 12px;
+    font-size: 11px;
   }
   .day-col.mon { border-color: var(--mon); }
   .day-col.tue { border-color: var(--tue); }
@@ -122,10 +123,10 @@
     margin-bottom: 8px;
   }
   .day-theme {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.4;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .day-col.mon .day-theme { color: var(--mon); }
   .day-col.tue .day-theme { color: var(--tue); }
