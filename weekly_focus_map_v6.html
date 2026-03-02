@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEEKLY FOCUS MAP v6</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2eb;
+    --card: #fff;
+    --mon: #4f8ef7;
+    --tue: #a259f7;
+    --wed: #52b788;
+    --thu: #f4845f;
+    --fri: #e05c5c;
+    --sat: #f7a325;
+    --sun: #e07fa0;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text);
+    padding: 32px 20px 60px;
+    min-width: 900px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #4f8ef7, #a259f7, #f4845f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .goals-section {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 2px solid #e8e4da;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .goal-card {
+    background: #faf9f6;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1.5px solid #e8e4da;
+  }
+  .goal-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .goal-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* CALENDAR */
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .day-col {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    border-top: 4px solid;
+    font-size: 12px;
+  }
+  .day-col.mon { border-color: var(--mon); }
+  .day-col.tue { border-color: var(--tue); }
+  .day-col.wed { border-color: var(--wed); background: #f0faf4; }
+  .day-col.thu { border-color: var(--thu); }
+  .day-col.fri { border-color: var(--fri); }
+  .day-col.sat { border-color: var(--sat); }
+  .day-col.sun { border-color: var(--sun); }
+
+  .day-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .day-name {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .day-theme {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .day-col.mon .day-theme { color: var(--mon); }
+  .day-col.tue .day-theme { color: var(--tue); }
+  .day-col.wed .day-theme { color: var(--wed); }
+  .day-col.thu .day-theme { color: var(--thu); }
+  .day-col.fri .day-theme { color: var(--fri); }
+  .day-col.sat .day-theme { color: var(--sat); }
+  .day-col.sun .day-theme { color: var(--sun); }
+
+  .day-desc {
+    font-size: 11px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .time-block {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+    align-items: flex-start;
+  }
+  .time {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 34px;
+    padding-top: 1px;
+  }
+  .task {
+    font-size: 11px;
+    color: #333;
+    line-height: 1.5;
+  }
+  .free-label {
+    font-size: 10px;
+    color: var(--muted);
+    border-top: 1px solid #e8e4da;
+    margin-top: 8px;
+    padding-top: 6px;
+    font-style: italic;
+  }
+
+  /* REST DAY SPECIAL */
+  .rest-badge {
+    display: inline-block;
+    background: var(--wed);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .rest-message {
+    font-size: 12px;
+    color: #3a7d5a;
+    line-height: 1.7;
+    background: #e8f5ee;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  /* CYCLE SECTION */
+  .cycle-section {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 2px solid #e8e4da;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+  }
+  .cycle-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+  .cycle-node {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .cycle-node.blue { background: var(--mon); }
+  .cycle-node.purple { background: var(--tue); }
+  .cycle-node.dark { background: #1a1a2e; }
+  .arrow { font-size: 18px; color: var(--muted); }
+  .cycle-outcomes {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .outcome {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .outcome.green { background: #d1fae5; color: #065f46; border: 1.5px solid #a7f3d0; }
+  .outcome.red { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; }
+
+  /* BOTTOM SECTIONS */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .info-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border-left: 4px solid;
+  }
+  .info-card.pink { border-color: var(--sun); }
+  .info-card.orange { border-color: var(--thu); }
+  .info-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .info-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .rule-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    border-bottom: 3px solid;
+    font-size: 12px;
+  }
+  .rule-card.blue { border-color: var(--mon); }
+  .rule-card.dark { border-color: #1a1a2e; }
+  .rule-card strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .rule-card p { color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>WEEKLY FOCUS MAP v6</h1>
+  <p>1日1テーマ。調べて、作って、出す。シンプルに回す。</p>
+</div>
+
+<!-- 2大目標 -->
+<div class="goals-section">
+  <div class="section-title">🎯 直近の2大目標</div>
+  <div class="goals-grid">
+    <div class="goal-card">
+      <h3>💰 月の手取りを30万円にする</h3>
+      <p>本業20万＋一人稼業10万。取り分100%の自分のプロダクトで稼ぐ。</p>
+    </div>
+    <div class="goal-card">
+      <h3>💑 結婚して子供が欲しい</h3>
+      <p>適齢期は待ってくれない。婚活は「後で」じゃなく「今」動かす。</p>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="calendar">
+
+  <!-- MON -->
+  <div class="day-col mon">
+    <div class="day-label">MON</div>
+    <div class="day-name">月曜</div>
+    <div class="day-theme">🔍 市場調査・ニーズ確認</div>
+    <div class="day-desc">「これ需要ある？」を調べる日。X検索、Google、ココナラ、既存サービスのレビューなどで需要を確認。</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">市場調査・ニーズ確認</span></div>
+    <div class="time-block"><span class="time">12:00</span><span class="task">昼休憩・ランニング</span></div>
+    <div class="time-block"><span class="time">14:00</span><span class="task">調査の続き・「何を作るか」を決める</span></div>
+    <div class="free-label">自由日 ― 需要を探す</div>
+  </div>
+
+  <!-- TUE -->
+  <div class="day-col tue">
+    <div class="day-label">TUE</div>
+    <div class="day-name">火曜</div>
+    <div class="day-theme">⚡ MVP作成・公開</div>
+    <div class="day-desc">月曜に「需要あり」と判断したものを作る。作ったらその日のうちに公開。完璧じゃなくていい。</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">MVP開発（AIフル活用）</span></div>
+    <div class="time-block"><span class="time">12:00</span><span class="task">昼休憩・ランニング</span></div>
+    <div class="time-block"><span class="time">14:00</span><span class="task">仕上げ・公開・Xで発信（1回目）</span></div>
+    <div class="free-label">自由日 ― 作って出す</div>
+  </div>
+
+  <!-- WED：休息日 -->
+  <div class="day-col wed">
+    <div class="day-label">WED</div>
+    <div class="day-name">水曜</div>
+    <div class="day-theme">🌿 休息日</div>
+    <span class="rest-badge">OFF DAY</span>
+    <div class="rest-message">
+      頭を休める日。インプット、散歩、趣味など自由に過ごす。<br>
+      無理に何かしなくていい。<br>
+      <br>
+      充電があるから木〜金が動ける。
+    </div>
+    <div class="free-label">自由日 ― 脳と体を回復させる</div>
+  </div>
+
+  <!-- THU -->
+  <div class="day-col thu">
+    <div class="day-label">THU</div>
+    <div class="day-name">木曜</div>
+    <div class="day-theme">📋 出社＋スーパー展開図</div>
+    <div class="day-desc">午前は出社・本業。午後はスーパー展開図の作業に集中。</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">本業（出社）</span></div>
+    <div class="time-block"><span class="time">12:00</span><span class="task" style="color:#f4845f;font-weight:700;">📐 スーパー展開図<br>（開発・検証・商用化作業）</span></div>
+    <div class="time-block"><span class="time">18:00</span><span class="task">終了・夕食など</span></div>
+    <div class="free-label">出社日 ― Xで発信（2回目）</div>
+  </div>
+
+  <!-- FRI -->
+  <div class="day-col fri">
+    <div class="day-label">FRI</div>
+    <div class="day-name">金曜</div>
+    <div class="day-theme">📋 本業</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">出社・通常業務</span></div>
+    <div class="free-label">出社日 ― 本業集中</div>
+  </div>
+
+  <!-- SAT -->
+  <div class="day-col sat">
+    <div class="day-label">SAT</div>
+    <div class="day-name">土曜</div>
+    <div class="day-theme">📋 本業＋競馬AI</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">出社・通常業務＋競馬AI PJ</span></div>
+    <div class="free-label">出社日 ― 競馬開催日</div>
+  </div>
+
+  <!-- SUN -->
+  <div class="day-col sun">
+    <div class="day-label">SUN</div>
+    <div class="day-name">日曜</div>
+    <div class="day-theme">📋 振り返り＋出社</div>
+    <div class="time-block"><span class="time">9:00</span><span class="task">週次振り返り（20分）</span></div>
+    <div class="time-block"><span class="time">10:00</span><span class="task">本業（出社）</span></div>
+    <div class="free-label">出社日 ― 反応チェック＋翌週の判断</div>
+  </div>
+
+</div>
+
+<!-- 一人稼業サイクル -->
+<div class="cycle-section">
+  <div class="section-title">🔄 一人稼業サイクル</div>
+  <div class="cycle-flow">
+    <div class="cycle-node blue">🔍 月：調べる</div>
+    <span class="arrow">→</span>
+    <div class="cycle-node purple">⚡ 火：作って出す</div>
+    <span class="arrow">→</span>
+    <div class="cycle-node dark">✉ Xで週2回発信</div>
+  </div>
+  <div class="cycle-outcomes">
+    <div class="outcome green">✅ 反応あり → 翌週も継続して作り込む</div>
+    <div class="outcome red">✗ 反応なし → 月曜に戻って別ネタを調べる</div>
+  </div>
+</div>
+
+<!-- 婚活・体づくり -->
+<div class="bottom-grid">
+  <div class="info-card pink">
+    <h3>💗 婚活 ― 毎晩30分 ＋ 週1回会う</h3>
+    <p>夜にアプリ30分。週1回は会う or 通話。プロフ写真の最適化が最優先。「痩せてから」は先延ばしの罠。</p>
+  </div>
+  <div class="info-card orange">
+    <h3>🏃 体づくり ― 週3回運動</h3>
+    <p>リモート日の昼にランニング＋週末1回。83kg→78kg目標。食事は1ルールだけ：夜の炭水化物を半分。</p>
+  </div>
+</div>
+
+<!-- ルール -->
+<div class="rule-grid">
+  <div class="rule-card blue">
+    <strong>🎯 1日1テーマ</strong>
+    <p>月は調べる、火は作る、水は休む。スイッチングしない。</p>
+  </div>
+  <div class="rule-card dark">
+    <strong>✉ Xで週2回発信</strong>
+    <p>火曜に公開報告、木曜に実例/スクショ。見られなければ判断できない。</p>
+  </div>
+</div>
+
+</body>
+</html>
